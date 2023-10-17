@@ -13,6 +13,6 @@ def demo_day():
         target_date = datetime(now.year + 1, 11, 3)
     
     delta = target_date - now
-    response_text = f'Time remaining until November 3rd: {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes.'
+    response_text = f'11/3までの残り日数: {delta.days+1} 日'
     
-    return jsonify({"text": response_text})
+    return jsonify({"response_type": "in_channel", "text": response_text})
