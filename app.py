@@ -58,7 +58,7 @@ def gpt4v():
                     max_tokens=500,
                 )
                 response_text_raw = response.choices[0].message.content
-                response_text = f"** response **: {response_text_raw}\n** image **: [![Image]({image_url})]({image_url})"
+                response_text = f"** prompt **: {prompt_text}\n** response **: {response_text_raw}\n** image **: [![Image]({image_url})]({image_url})"
                 print(response_text)
     else:
         response_text = "invalid token"
