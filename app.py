@@ -59,4 +59,4 @@ def gpt4v():
                 print(response_text)
     else:
         response_text = "invalid token"
-    return jsonify({"response_type": "in_channel", "text": response_text, "image_url": image_url})
+    return jsonify({"response_type": "in_channel", "text": response_text, "attachments": {"image_url": image_url, "author_name": "GPT4V", "author_icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/GPT-4.png/480px-GPT-4.png"}})
