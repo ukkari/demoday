@@ -20,6 +20,7 @@ def demo_day():
 
 @app.route('/gpt4v', methods=['POST'])
 def gpt4v():
+    image_url = "https://jr.mitou.org/assets/img/404.webp"
     auth_header = request.headers.get('Authorization')
     if auth_header:
         token = auth_header.split(" ")[1]
@@ -35,7 +36,7 @@ def gpt4v():
 
                 client = OpenAI(
                     # defaults to os.environ.get("OPENAI_API_KEY")
-                    api_key="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",
+                    api_key="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",
                 )
 
                 response = client.chat.completions.create(
@@ -58,4 +59,4 @@ def gpt4v():
                 print(response_text)
     else:
         response_text = "invalid token"
-    return jsonify({"response_type": "in_channel", "text": response_text})
+    return jsonify({"response_type": "in_channel", "text": response_text, "image_url": image_url})
