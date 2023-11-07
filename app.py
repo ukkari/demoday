@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
+load_dotenv()
 
 @app.route('/demoday', methods=['POST'])
 def demo_day():
@@ -24,7 +27,7 @@ def gpt4v():
     auth_header = request.headers.get('Authorization')
     if auth_header:
         token = auth_header.split(" ")[1]
-        if token != "nhjb64qd3jnbmfg1jpgtbqbeca":
+        if token != os.getenv("BEARER_TOKEN"):
             response_text = "invalid token"
         else:
             inputs = request.form.get('text').split()
@@ -54,8 +57,9 @@ def gpt4v():
                     ],
                     max_tokens=500,
                 )
-                response_text = response.choices[0].message.content
+                response_text_raw = response.choices[0].message.content
+                response_text = f"** response **: {response_text_raw}\n** image **: [![Image]({image_url})]({image_url})"
                 print(response_text)
     else:
         response_text = "invalid token"
-    return jsonify({"response_type": "in_channel", "text": response_text, "attachments": {"image_url": image_url}, "username": "GPT4V", "icon_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/GPT-4.png/480px-GPT-4.png"})
+    return jsonify({"response_type": "in_channel", "text": response_text})
