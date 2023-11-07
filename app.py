@@ -36,7 +36,6 @@ def gpt4v():
 
                 client = OpenAI(
                     # defaults to os.environ.get("OPENAI_API_KEY")
-                    api_key="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",
                 )
 
                 response = client.chat.completions.create(
