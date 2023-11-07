@@ -22,7 +22,7 @@ def demo_day():
 def gpt4v():
     response = ""
     data = request.get_json()
-    inputs = request.values.get('text').strip().split()
+    inputs = flask.request.values.get('text').strip().split()
     if len(inputs) != 2:
         response_text = "invalid input"
     else:
