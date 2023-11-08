@@ -2,7 +2,19 @@ from flask import Flask, request, jsonify
 from datetime import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
+import base64
 import os
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
 
 app = Flask(__name__)
 load_dotenv()
@@ -31,35 +43,53 @@ def gpt4v():
             response_text = "invalid token"
         else:
             inputs = request.form.get('text').split()
-            if len(inputs) < 2:
-                response_text = "invalid input"
-            else:
-                image_url = inputs[0]
-                prompt_text = " ".join(inputs[1:])
-
-                client = OpenAI(
-                    # defaults to os.environ.get("OPENAI_API_KEY")
-                )
-
-                response = client.chat.completions.create(
-                    model="gpt-4-vision-preview",
-                    messages=[
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "text", "text": prompt_text},
-                                {
-                                    "type": "image_url",
-                                    "image_url": image_url,
-                                },
-                            ],
+            if 'file' in request.files:
+                file = request.files['file']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    mime_type = f"image/{filename.rsplit('.', 1)[1].lower()}"
+                    # Read file data and encode it
+                    image_data = file.read()
+                    base64_image = base64.b64encode(image_data).decode('utf-8')
+                    image_payload = {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:{mime_type};base64,{base64_image}"
                         }
-                    ],
-                    max_tokens=500,
-                )
-                response_text_raw = response.choices[0].message.content
-                response_text = f"** prompt **: {prompt_text}\n** response **: {response_text_raw}\n** image **: [![Image]({image_url})]({image_url})"
-                print(response_text)
+                    }
+                    prompt_text = " ".join(inputs[0:])
+                else:
+                    response_text = "invalid input"
+            else:
+                if len(inputs) < 2:
+                    response_text = "invalid input"
+                else:
+                    image_payload = {
+                        "type": "image_url",
+                        "image_url": inputs[0]
+                    }
+                    prompt_text = " ".join(inputs[1:])
+
+            client = OpenAI(
+                # defaults to os.environ.get("OPENAI_API_KEY")
+            )
+
+            response = client.chat.completions.create(
+                model="gpt-4-vision-preview",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt_text},
+                            image_payload,
+                        ],
+                    }
+                ],
+                max_tokens=500,
+            )
+            response_text_raw = response.choices[0].message.content
+            response_text = f"** prompt **: {prompt_text}\n** response **: {response_text_raw}\n** image **: [![Image]({image_url})]({image_url})"
+            print(response_text)
     else:
         response_text = "invalid token"
     return jsonify({"response_type": "in_channel", "text": response_text})
