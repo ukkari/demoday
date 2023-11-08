@@ -43,6 +43,7 @@ def gpt4v():
             response_text = "invalid token"
         else:
             inputs = request.form.get('text').split()
+            print(request.files)
             if 'file' in request.files:
                 file = request.files['file']
                 if file and allowed_file(file.filename):
