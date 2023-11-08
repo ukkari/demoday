@@ -41,8 +41,10 @@ def gpt4v():
         token = auth_header.split(" ")[1]
         if token != os.getenv("BEARER_TOKEN"):
             response_text = "invalid token"
+            return jsonify({"response_type": "in_channel", "text": response_text})
         else:
             inputs = request.form.get('text').split()
+            print(request)
             print(request.files)
             if 'file' in request.files:
                 file = request.files['file']
@@ -61,13 +63,16 @@ def gpt4v():
                     prompt_text = " ".join(inputs[0:])
                 else:
                     response_text = "invalid input"
+                    return jsonify({"response_type": "in_channel", "text": response_text})
             else:
-                if len(inputs) < 2:
+                if len(inputs) < 2 or ('.' not in inputs[0]) or (inputs[0].rsplit('.', 1)[1].lower() not in ALLOWED_EXTENSIONS):
                     response_text = "invalid input"
+                    return jsonify({"response_type": "in_channel", "text": response_text})
                 else:
+                    image_url = inputs[0]
                     image_payload = {
                         "type": "image_url",
-                        "image_url": inputs[0]
+                        "image_url": image_url
                     }
                     prompt_text = " ".join(inputs[1:])
 
