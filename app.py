@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import base64
 import os
+import re
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
@@ -15,6 +16,7 @@ def allowed_file(filename):
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
+
 
 app = Flask(__name__)
 load_dotenv()
@@ -65,7 +67,7 @@ def gpt4v():
                     response_text = "invalid input"
                     return jsonify({"response_type": "in_channel", "text": response_text})
             else:
-                if len(inputs) < 2 or ('.' not in inputs[0]) or (inputs[0].rsplit('.', 1)[1].lower() not in ALLOWED_EXTENSIONS):
+                if len(inputs) < 2 or not inputs[0].startswith("http"):
                     response_text = "invalid input"
                     return jsonify({"response_type": "in_channel", "text": response_text})
                 else:
